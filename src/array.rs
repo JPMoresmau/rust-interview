@@ -74,6 +74,41 @@ pub fn pairs_product(nbs: &[i32], prod: i32) -> Vec<(i32,i32)> {
     v
 }
 
+pub fn quick_sort(nbs: &mut Vec<i32>) {
+    if nbs.len()>1 {
+        quick_sort_partial(nbs, 0, nbs.len()-1);
+    }
+}
+
+pub fn quick_sort_partial(nbs: &mut Vec<i32>,low: usize, high: usize) {
+    if low < high {
+        let p = partition(nbs, low, high);
+        if p > 0 {
+            quick_sort_partial(nbs, low, p-1);
+        }
+        quick_sort_partial(nbs, p+1, high);
+    }
+}
+
+fn partition(nbs: &mut Vec<i32>,low: usize, high: usize) -> usize {
+    let pivot : i32 = nbs[high];
+    let mut i = low;
+    for j in low..high {
+        if nbs[j]<pivot {
+            swap(nbs,i,j);
+            i = i+1;
+        }
+    }
+    swap(nbs,i,high);
+    i
+}
+
+fn swap(nbs: &mut Vec<i32>,low: usize, high: usize) {
+    let tmp : i32 = nbs[low];
+    nbs[low] = nbs[high];
+    nbs[high] = tmp;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -136,5 +171,12 @@ mod tests {
         assert_eq!(vec!((1,2)),pairs_product(&vec!(1,2),2));
         assert_eq!(vec!((2,3)),pairs_product(&vec!(1,2,3),6));
         assert_eq!(vec!((2,6),(3,4)),pairs_product(&vec!(1,2,3,4,6),12));
+    }
+
+    #[test]
+    fn test_quick_sort(){
+        let mut nbs = vec!(3,2,35,1,-2,100);
+        quick_sort(&mut nbs);
+        assert_eq!(vec!(-2,1,2,3,35,100),nbs);
     }
 }
