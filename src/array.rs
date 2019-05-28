@@ -1,12 +1,64 @@
-use std::collections::HashSet;
+
+
+#[derive(Eq,PartialEq,Debug)]
+pub struct MySet {
+    data: Vec<i32>
+}
+
+impl MySet {
+
+    pub fn new() -> MySet {
+         MySet {data: Vec::new()}
+    }
+
+    pub fn from_slice(nbs: &[i32]) -> MySet {
+        let mut v = vec!();
+        for i in nbs {
+            v.push(*i);
+        }
+        MySet {data: v}
+    }
+
+    pub fn from_vec(v: Vec<i32>) -> MySet {
+        MySet {data: v.clone()}
+    }
+
+    pub fn contains(&self, i:i32) -> bool {
+        self.data.contains(&i)
+    }
+
+    pub fn insert(&mut self, i:i32) -> bool {
+        if self.contains(i){
+            return false;
+        }
+        self.data.push(i);
+        true
+    }
+
+    
+    pub fn remove(&mut self, i: &i32) -> bool {
+        let idx=self.data.iter().enumerate().find(|(_,n)| **n == *i);
+        match idx {
+            None => false,
+            Some((ix,_)) => {
+                self.data.remove(ix);
+                true
+            },
+        }
+    }
+
+    pub fn first(&self) ->  Option<i32> {
+        self.data.iter().next().map(|i| *i)
+    }
+}
 
 
 pub fn missing_number(nbs: &[i32], low :i32, high: i32) -> Option<i32>{
-    missing_numbers(nbs,low,high).iter().cloned().next()
+    missing_numbers(nbs,low,high).first()
 }
 
-pub fn missing_numbers(nbs: &[i32], low :i32, high: i32) -> HashSet<i32>{
-    let mut s: HashSet<i32> = (low .. high+1).collect();
+pub fn missing_numbers(nbs: &[i32], low :i32, high: i32) -> MySet{
+    let mut s = MySet::from_vec((low .. high+1).collect());
     nbs.iter().for_each(|i| {
         if *i < low || *i > high {
             panic!("{} wasn't in range {}-{}", i, low, high);
@@ -17,12 +69,12 @@ pub fn missing_numbers(nbs: &[i32], low :i32, high: i32) -> HashSet<i32>{
 }
 
 pub fn duplicate(nbs: &[i32]) -> Option<i32>{
-    duplicates(nbs).iter().cloned().next()
+    duplicates(nbs).first()
 }
 
-pub fn duplicates(nbs: &[i32]) -> HashSet<i32>{
-    let mut s: HashSet<i32> = HashSet::new();
-    let mut dup: HashSet<i32> = HashSet::new();
+pub fn duplicates(nbs: &[i32]) -> MySet{
+    let mut s = MySet::new();
+    let mut dup = MySet::new();
     nbs.iter().for_each(|i| {
         let changed = s.insert(*i);
         if !changed {
@@ -30,6 +82,11 @@ pub fn duplicates(nbs: &[i32]) -> HashSet<i32>{
         }
     });
     dup
+}
+
+pub fn dedup(nbs: &mut Vec<i32>) {
+    let mut s = MySet::new();
+    nbs.retain(|i| s.insert(*i))
 }
 
 pub fn range(nbs: &[i32]) -> (i32,i32) {
@@ -83,14 +140,13 @@ pub fn quick_sort(nbs: &mut Vec<i32>) {
 pub fn quick_sort_partial(nbs: &mut Vec<i32>,low: usize, high: usize) {
     if low < high {
         let p = partition(nbs, low, high);
-        if p > 0 {
-            quick_sort_partial(nbs, low, p-1);
-        }
+        quick_sort_partial(nbs, low, p);
         quick_sort_partial(nbs, p+1, high);
     }
 }
 
 fn partition(nbs: &mut Vec<i32>,low: usize, high: usize) -> usize {
+    /* Lomuto
     let pivot : i32 = nbs[high];
     let mut i = low;
     for j in low..high {
@@ -100,7 +156,21 @@ fn partition(nbs: &mut Vec<i32>,low: usize, high: usize) -> usize {
         }
     }
     swap(nbs,i,high);
-    i
+    i*/
+    /* Hoare */
+    let pivot : i32 = nbs[low + (high-low)/2];
+    let mut i = low ;
+    let mut j = high;
+    loop {
+        while nbs[i] < pivot {i=i+1};
+        while nbs[j] > pivot {j=j-1};
+        if i >= j {
+            break j;
+        }
+        swap(nbs,i,j);
+        i=i+1;
+        j=j-1;
+    }
 }
 
 fn swap(nbs: &mut Vec<i32>,low: usize, high: usize) {
@@ -109,10 +179,21 @@ fn swap(nbs: &mut Vec<i32>,low: usize, high: usize) {
     nbs[high] = tmp;
 }
 
+pub fn reverse(nbs: &mut Vec<i32>) {
+    if nbs.len()>0 {
+        let mut i = 0;
+        let mut j = nbs.len()-1;
+        while i<j {
+            swap(nbs,i,j);
+            i=i+1;
+            j=j-1;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::iter::FromIterator;
 
     #[test]
     fn test_missing_number() {
@@ -144,11 +225,11 @@ mod tests {
 
      #[test]
     fn test_duplicates(){
-        assert_eq!(HashSet::new(),duplicates(&vec!(1,2,3)));
-        assert_eq!(HashSet::from_iter(vec!(1).iter().cloned()),duplicates(&vec!(1,2,3,1)));
-        assert_eq!(HashSet::from_iter(vec!(1).iter().cloned()),duplicates(&vec!(1,1,2,3)));
-        assert_eq!(HashSet::from_iter(vec!(3).iter().cloned()),duplicates(&vec!(1,2,3,3)));
-        assert_eq!(HashSet::from_iter(vec!(1,3).iter().cloned()),duplicates(&vec!(1,1,2,3,3)));
+        assert_eq!(MySet::new(),duplicates(&vec!(1,2,3)));
+        assert_eq!(MySet::from_vec(vec!(1)),duplicates(&vec!(1,2,3,1)));
+        assert_eq!(MySet::from_vec(vec!(1)),duplicates(&vec!(1,1,2,3)));
+        assert_eq!(MySet::from_vec(vec!(3)),duplicates(&vec!(1,2,3,3)));
+        assert_eq!(MySet::from_vec(vec!(1,3)),duplicates(&vec!(1,1,2,3,3)));
     }
 
     #[test]
@@ -178,5 +259,28 @@ mod tests {
         let mut nbs = vec!(3,2,35,1,-2,100);
         quick_sort(&mut nbs);
         assert_eq!(vec!(-2,1,2,3,35,100),nbs);
+    }
+
+    #[test]
+    fn test_dedup(){
+        let mut nbs = vec!(3,1,1,2,3);
+        dedup(&mut nbs);
+        assert_eq!(vec!(3,1,2),nbs);
+    }
+
+    #[test]
+    fn test_reverse(){
+        let mut nbs = vec!(1,2,3,4);
+        reverse(&mut nbs);
+        assert_eq!(vec!(4,3,2,1),nbs);
+        let mut nbs = vec!(1,2,3,4,5);
+        reverse(&mut nbs);
+        assert_eq!(vec!(5,4,3,2,1),nbs);
+        let mut nbs = vec!();
+        reverse(&mut nbs);
+        assert_eq!(vec!() as Vec<i32>,nbs);
+        let mut nbs = vec!(1);
+        reverse(&mut nbs);
+        assert_eq!(vec!(1),nbs);
     }
 }
