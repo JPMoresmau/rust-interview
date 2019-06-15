@@ -16,7 +16,7 @@ enum LCell<T> {
     Nil,
 }
 
-impl <'a, T> LList<T> {
+impl <T> LList<T> {
     /// new empty list
     pub fn new() -> LList<T> {
         LList { size: 0, head: LCell::Nil}
