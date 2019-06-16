@@ -1,6 +1,8 @@
 //! Binary Search Tree implementation
 use std::mem;
 use std::iter::IntoIterator;
+use std::iter::FromIterator;
+use std::cmp::max;
 
 /// The Binary Search Tree, possibly empty
 #[derive(Debug)]
@@ -47,6 +49,14 @@ impl <'a, K: Eq + PartialOrd,V> BTree<K,V> {
         self.root = r;
         v
     }
+
+    pub fn len(&self) -> usize {
+        self.into_iter().count()
+    }
+
+    pub fn depth(&self) -> usize {
+        depth(&self.root)
+    }
 }
 
 /// Turn into an in-order iterator
@@ -88,6 +98,18 @@ impl <'a, K, V> Iterator for BTIterator<'a, K, V> {
             }
         }
         
+    }
+}
+
+/// convert from an iterator
+impl <K: Eq + PartialOrd,V> FromIterator<(K,V)> for BTree<K,V> {
+    
+    fn from_iter<I: IntoIterator<Item=(K,V)>>(iter: I) -> Self {
+        let mut t = BTree::new();
+        for i in iter {
+            t.insert(i.0,i.1);
+        }
+        t
     }
 }
 
@@ -171,6 +193,13 @@ fn find_next<K: Eq + PartialOrd,V>(mut onode : Box<BNode<K,V>>) -> (Option<Box<B
     }
 }
 
+fn depth<K,V>(onode: &Option<Box<BNode<K,V>>>) -> usize {
+    match onode {
+        None => 0,
+        Some(node) => max(depth(&node.left),depth(&node.right))+1,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -179,12 +208,21 @@ mod tests {
     fn test_basic(){
         let mut tree = BTree::new();
         assert!(tree.is_empty());
+        assert_eq!(0,tree.len());
+        assert_eq!(0,tree.depth());
         tree.insert(1, "01");
         assert_eq!(false, tree.is_empty());
+        assert_eq!(1,tree.len());
+        assert_eq!(1,tree.depth());
         tree.insert(2, "10");
         assert_eq!(false, tree.is_empty());
+        assert_eq!(2,tree.len());
+        assert_eq!(2,tree.depth());
         tree.insert(0, "00");
         assert_eq!(false, tree.is_empty());
+        assert_eq!(3,tree.len());
+        assert_eq!(2,tree.depth());
+
         assert_eq!(Some(&"01"),tree.get(&1));
         assert_eq!(Some(&"10"),tree.get(&2));
         assert_eq!(Some(&"00"),tree.get(&0));
@@ -195,11 +233,17 @@ mod tests {
         assert_eq!(None,tree.get(&1));
         assert_eq!(Some(&"10"),tree.get(&2));
         assert_eq!(Some(&"00"),tree.get(&0));
+        assert_eq!(2,tree.len());
+        assert_eq!(2,tree.depth());
 
         assert_eq!(Some("10"),tree.delete(&2));
         assert_eq!(false, tree.is_empty());
+        assert_eq!(1,tree.len());
+        assert_eq!(1,tree.depth());
         assert_eq!(Some("00"),tree.delete(&0));
         assert!(tree.is_empty());
+        assert_eq!(0,tree.len());
+        assert_eq!(0,tree.depth());
     }
 
     #[test]
@@ -217,6 +261,16 @@ mod tests {
     }
 
     #[test]
+    fn test_from_it(){
+        let iter = (0..3).into_iter().map(|i| (i,i.to_string()));
+        let tree = BTree::from_iter(iter);
+        assert_eq!(Some(&String::from("1")),tree.get(&1));
+        assert_eq!(Some(&String::from("2")),tree.get(&2));
+        assert_eq!(Some(&String::from("0")),tree.get(&0));
+        assert_eq!(None,tree.get(&3));
+    }
+
+    #[test]
     fn test_wikipedia() {
         // <https://en.wikipedia.org/wiki/Binary_search_tree>
         let mut tree = BTree::new();
@@ -229,6 +283,9 @@ mod tests {
         tree.insert(10,"10");
         tree.insert(14,"14");
         tree.insert(13,"13");
+        assert_eq!(9,tree.len());
+        assert_eq!(4,tree.depth());
+
         let mut it = tree.into_iter();
         assert_eq!(Some((&1,&"1")),it.next());
         assert_eq!(Some((&3,&"3")),it.next());
