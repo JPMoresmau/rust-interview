@@ -197,6 +197,65 @@ fn partition(nbs: &mut Vec<i32>, low: usize, high: usize) -> usize {
     }
 }
 
+/// bubble sort
+pub fn bubble_sort(nbs: &mut Vec<i32>) {
+    loop {
+        let mut changed = false;
+        for i in 0..nbs.len()-1 {
+            if nbs[i]>nbs[i+1]{
+                swap(nbs,i,i+1);
+                changed = true;
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+}
+
+/// insertion sort
+pub fn insertion_sort(nbs: &mut Vec<i32>) {
+    for i in 1..nbs.len() {
+        let mut j = i;
+        while j > 0 && nbs[j-1]>nbs[j]{
+            swap(nbs,j-1,j);
+            j-=1;
+        }
+    }
+}
+
+/// merge sort
+pub fn merge_sort(nbs: &mut Vec<i32>) {
+    let v = merge_sort_step(nbs,0,nbs.len());
+    for i in 0..nbs.len(){
+        nbs[i] = v[i];
+    }
+}
+
+/// merge sort step, returning a new sorted vector
+fn merge_sort_step(nbs: &Vec<i32>,low: usize, high: usize) -> Vec<i32>{
+    if low<high-1 {
+        let middle = low + (high-low) / 2;
+        let v1 = merge_sort_step(nbs,low,middle);
+        let v2 = merge_sort_step(nbs,middle,high);
+        let mut i1 = 0;
+        let mut i2 = 0;
+        let mut ret = Vec::with_capacity(high-low);
+        while i1<v1.len() || i2<v2.len() {
+            if i1<v1.len() && (i2==v2.len() || v1[i1]<v2[i2]){
+                ret.push(v1[i1]);
+                i1+=1;
+            } else {
+                ret.push(v2[i2]);
+                i2+=1;
+            }
+        };
+        ret
+    } else {
+        vec!(nbs[low])
+    }
+}
+
 /// swap two numbers
 fn swap(nbs: &mut Vec<i32>, low: usize, high: usize) {
     let tmp: i32 = nbs[low];
@@ -291,8 +350,33 @@ mod tests {
 
     #[test]
     fn test_quick_sort() {
+        test_sort(&quick_sort);
+    }
+
+    #[test]
+    fn test_bubble_sort() {
+        test_sort(&bubble_sort);
+    }
+
+    #[test]
+    fn test_insertion_sort() {
+        test_sort(&insertion_sort);
+    }
+
+    #[test]
+    fn test_merge_sort() {
+        test_sort(&merge_sort);
+    }
+
+    fn test_sort(f: &Fn(&mut Vec<i32>)) {
+        let mut nbs = vec![3, 2, 1];
+        f(&mut nbs);
+        assert_eq!(vec!(1, 2, 3), nbs);
+        let mut nbs = vec![1, 2, 3];
+        f(&mut nbs);
+        assert_eq!(vec!(1, 2, 3), nbs);
         let mut nbs = vec![3, 2, 35, 1, -2, 100];
-        quick_sort(&mut nbs);
+        f(&mut nbs);
         assert_eq!(vec!(-2, 1, 2, 3, 35, 100), nbs);
     }
 
