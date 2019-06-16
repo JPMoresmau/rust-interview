@@ -50,10 +50,12 @@ impl <'a, K: Eq + PartialOrd,V> BTree<K,V> {
         v
     }
 
+    /// number of elements in the tree
     pub fn len(&self) -> usize {
         self.into_iter().count()
     }
 
+    /// depth of the tree
     pub fn depth(&self) -> usize {
         depth(&self.root)
     }
@@ -193,6 +195,7 @@ fn find_next<K: Eq + PartialOrd,V>(mut onode : Box<BNode<K,V>>) -> (Option<Box<B
     }
 }
 
+/// depth of a node
 fn depth<K,V>(onode: &Option<Box<BNode<K,V>>>) -> usize {
     match onode {
         None => 0,
