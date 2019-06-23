@@ -1,4 +1,5 @@
 //! Deranged anagrams
+//! Added as Rust entry at http://www.rosettacode.org/wiki/Anagrams/Deranged_anagrams#Rust
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fs::File;
