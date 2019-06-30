@@ -1,7 +1,7 @@
 //! Maths functions
 
 /// Calculate difference between two bearings, in -180 to 180 degrees range
-/// Added as Rust entry at http://www.rosettacode.org/wiki/Angle_difference_between_two_bearings#Rust
+/// Submitted to http://www.rosettacode.org/wiki/Angle_difference_between_two_bearings#Rust
 pub fn angle_difference(bearing1: f64, bearing2: f64) -> f64 {
     let diff = (bearing2 - bearing1) % 360.0;
     if diff < -180.0 {
