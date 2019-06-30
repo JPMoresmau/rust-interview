@@ -1,4 +1,4 @@
-use interview::{get_words, longest_deranged};
+/*use interview::{get_words, longest_deranged};
 
 fn main() {
     let r = get_words();
@@ -12,4 +12,10 @@ fn main() {
         },
         Err(e) => panic!("Could not read words: {}",e)
     } 
+}*/
+
+use interview::pi;
+
+fn main() {
+    println!("pi(7): {}", pi(7));
 }

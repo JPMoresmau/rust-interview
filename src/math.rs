@@ -1,5 +1,7 @@
 //! Maths functions
 
+use std::f64;
+
 /// Calculate difference between two bearings, in -180 to 180 degrees range
 /// Submitted to http://www.rosettacode.org/wiki/Angle_difference_between_two_bearings#Rust
 pub fn angle_difference(bearing1: f64, bearing2: f64) -> f64 {
@@ -13,6 +15,51 @@ pub fn angle_difference(bearing1: f64, bearing2: f64) -> f64 {
     }
 
 }
+
+///! calculate pi with algebraic/geometric mean
+pub fn pi(n: usize) -> f64 {
+    let mut a : f64 = 1.0;
+    let two : f64= 2.0;
+    let mut g = 1.0 / two.sqrt();
+    let mut s = 0.0;
+    let mut k = 1;
+    while k<=n  {
+       
+        let a1 = (a+g)/two;
+        let g1 = (a*g).sqrt();
+        a = a1;
+        g = g1;
+        s += (a.powi(2)-g.powi(2)) * two.powi((k+1) as i32);
+        k += 1;
+         
+
+    }
+
+    4.0 * a.powi(2) / (1.0-s)
+}
+
+/*
+pub fn pi(n: usize) -> BigRational {
+    let mut a = BigRational::from_i64(1).unwrap();
+    let two = BigRational::from_i64(2).unwrap();
+    let mut g = a / two.sqrt();
+    let mut s = 0.0;
+    let mut k : usize = 1;
+//&& (a-g).abs() > f64::EPSILON
+    while k<=n  {
+       
+        let a1 = (a+g)/two;
+        let g1 = (a*g).sqrt();
+        a = a1;
+        g = g1;
+        s += (pow(a,2)-pow(g,2)) * pow(two,k+1);
+        k += 1;
+         
+
+    }
+
+    4.0 * a.powi(2) / (1.0-s)
+}*/
 
 
 #[cfg(test)]
