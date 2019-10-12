@@ -256,6 +256,77 @@ fn merge_sort_step(nbs: &Vec<i32>,low: usize, high: usize) -> Vec<i32>{
     }
 }
 
+/// heap sort
+pub fn heap_sort(nbs: &mut Vec<i32>) {
+    heapify(nbs);
+    let mut end = nbs.len()-1;
+    while end > 0 {
+        swap(nbs, end, 0);
+        end -= 1;
+        sift_down(nbs, 0, end);
+    }
+}
+
+/// put elements of the vec in heap order
+fn heapify(nbs: &mut Vec<i32>) {
+    let mut end = 1;
+    let c = nbs.len();
+    while end < c {
+        sift_up(nbs, 0, end);
+        end +=1;
+    }
+}
+
+/// repair the heap from the root at start
+fn sift_down(nbs: &mut Vec<i32>, start: usize, end: usize) {
+    let mut root = start;
+    while heap_left(root) <= end {
+        let child = heap_left(root);
+        let mut swp = root;
+        if nbs[swp] < nbs[child]{
+            swp = child;
+        }
+        if child+1 < end && nbs[swp] < nbs[child+1] {
+            swp = child + 1;
+        }
+        if swp == root {
+            return;
+        } else {
+            swap(nbs,root,swp);
+            root = swp;
+        }
+    }
+}
+
+/// build the heap up
+fn sift_up(nbs: &mut Vec<i32>, start: usize, end: usize) {
+    let mut child = end;
+    while child > start {
+        let p = heap_parent(child);
+        if nbs[p] < nbs[child] {
+            swap(nbs, p, child);
+            child = p;
+        } else {
+            return;
+        }
+    }
+}
+
+/// index of parent in heap
+fn heap_parent (i: usize) -> usize {
+    (i-1)/2
+}
+
+/// index of left child in heap
+fn heap_left (i: usize) -> usize {
+    2*i + 1
+}
+
+/// index of right child in heap
+fn heap_right (i: usize) -> usize {
+    2*i + 2
+}
+
 /// swap two numbers
 fn swap(nbs: &mut Vec<i32>, low: usize, high: usize) {
     let tmp: i32 = nbs[low];
@@ -368,7 +439,12 @@ mod tests {
         test_sort(&merge_sort);
     }
 
-    fn test_sort(f: &Fn(&mut Vec<i32>)) {
+    #[test]
+    fn test_heap_sort() {
+        test_sort(&heap_sort);
+    }
+
+    fn test_sort(f: &dyn Fn(&mut Vec<i32>)) {
         let mut nbs = vec![3, 2, 1];
         f(&mut nbs);
         assert_eq!(vec!(1, 2, 3), nbs);
