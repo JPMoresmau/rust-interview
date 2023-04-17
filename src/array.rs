@@ -1,14 +1,13 @@
 //! Integer arrays problems
 
 /// Our own trivial implementation of an integer set to avoid using HashSet
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Default)]
 pub struct IntSet {
     data: Vec<i32>,
 }
 
 /// implementation of set
 impl IntSet {
-
     /// new empty set
     pub fn new() -> IntSet {
         IntSet { data: Vec::new() }
@@ -25,7 +24,7 @@ impl IntSet {
 
     /// create a set from a vec
     pub fn from_vec(v: Vec<i32>) -> IntSet {
-        IntSet { data: v.clone() }
+        IntSet { data: v }
     }
 
     /// does the set contain the given integer?
@@ -58,7 +57,7 @@ impl IntSet {
 
     /// get the first integer in the set, or None if the set is empty
     pub fn first(&self) -> Option<i32> {
-        self.data.iter().next().map(|i| *i)
+        self.data.first().copied()
     }
 }
 
@@ -105,7 +104,7 @@ pub fn dedup(nbs: &mut Vec<i32>) {
 
 /// return min and max elements
 pub fn range(nbs: &[i32]) -> (i32, i32) {
-    if nbs.len() == 0 {
+    if nbs.is_empty() {
         panic!("Empty array");
     }
     let mut min = nbs[0];
@@ -164,7 +163,7 @@ pub fn quick_sort_partial(nbs: &mut Vec<i32>, low: usize, high: usize) {
 }
 
 /// quick sort partition step
-fn partition(nbs: &mut Vec<i32>, low: usize, high: usize) -> usize {
+fn partition(nbs: &mut [i32], low: usize, high: usize) -> usize {
     // Lomuto
     /*
     let pivot : i32 = nbs[high];
@@ -183,17 +182,17 @@ fn partition(nbs: &mut Vec<i32>, low: usize, high: usize) -> usize {
     let mut j = high;
     loop {
         while nbs[i] < pivot {
-            i = i + 1
+            i += 1;
         }
         while nbs[j] > pivot {
-            j = j - 1
+            j -= 1;
         }
         if i >= j {
             break j;
         }
-        swap(nbs, i, j);
-        i = i + 1;
-        j = j - 1;
+        nbs.swap(i, j);
+        i += 1;
+        j -= 1;
     }
 }
 
@@ -201,9 +200,9 @@ fn partition(nbs: &mut Vec<i32>, low: usize, high: usize) -> usize {
 pub fn bubble_sort(nbs: &mut Vec<i32>) {
     loop {
         let mut changed = false;
-        for i in 0..nbs.len()-1 {
-            if nbs[i]>nbs[i+1]{
-                swap(nbs,i,i+1);
+        for i in 0..nbs.len() - 1 {
+            if nbs[i] > nbs[i + 1] {
+                nbs.swap(i, i + 1);
                 changed = true;
             }
         }
@@ -217,51 +216,50 @@ pub fn bubble_sort(nbs: &mut Vec<i32>) {
 pub fn insertion_sort(nbs: &mut Vec<i32>) {
     for i in 1..nbs.len() {
         let mut j = i;
-        while j > 0 && nbs[j-1]>nbs[j]{
-            swap(nbs,j-1,j);
-            j-=1;
+        while j > 0 && nbs[j - 1] > nbs[j] {
+            nbs.swap(j - 1, j);
+            j -= 1;
         }
     }
 }
 
 /// merge sort
 pub fn merge_sort(nbs: &mut Vec<i32>) {
-    let v = merge_sort_step(nbs,0,nbs.len());
-    for i in 0..nbs.len(){
-        nbs[i] = v[i];
-    }
+    let l = nbs.len();
+    let v = merge_sort_step(nbs, 0, l);
+    nbs.copy_from_slice(&v[..l]);
 }
 
 /// merge sort step, returning a new sorted vector
-fn merge_sort_step(nbs: &Vec<i32>,low: usize, high: usize) -> Vec<i32>{
-    if low<high-1 {
-        let middle = low + (high-low) / 2;
-        let v1 = merge_sort_step(nbs,low,middle);
-        let v2 = merge_sort_step(nbs,middle,high);
+fn merge_sort_step(nbs: &Vec<i32>, low: usize, high: usize) -> Vec<i32> {
+    if low < high - 1 {
+        let middle = low + (high - low) / 2;
+        let v1 = merge_sort_step(nbs, low, middle);
+        let v2 = merge_sort_step(nbs, middle, high);
         let mut i1 = 0;
         let mut i2 = 0;
-        let mut ret = Vec::with_capacity(high-low);
-        while i1<v1.len() || i2<v2.len() {
-            if i1<v1.len() && (i2==v2.len() || v1[i1]<v2[i2]){
+        let mut ret = Vec::with_capacity(high - low);
+        while i1 < v1.len() || i2 < v2.len() {
+            if i1 < v1.len() && (i2 == v2.len() || v1[i1] < v2[i2]) {
                 ret.push(v1[i1]);
-                i1+=1;
+                i1 += 1;
             } else {
                 ret.push(v2[i2]);
-                i2+=1;
+                i2 += 1;
             }
-        };
+        }
         ret
     } else {
-        vec!(nbs[low])
+        vec![nbs[low]]
     }
 }
 
 /// heap sort
 pub fn heap_sort(nbs: &mut Vec<i32>) {
     heapify(nbs);
-    let mut end = nbs.len()-1;
+    let mut end = nbs.len() - 1;
     while end > 0 {
-        swap(nbs, end, 0);
+        nbs.swap(end, 0);
         end -= 1;
         sift_down(nbs, 0, end);
     }
@@ -273,38 +271,38 @@ fn heapify(nbs: &mut Vec<i32>) {
     let c = nbs.len();
     while end < c {
         sift_up(nbs, 0, end);
-        end +=1;
+        end += 1;
     }
 }
 
 /// repair the heap from the root at start
-fn sift_down(nbs: &mut Vec<i32>, start: usize, end: usize) {
+fn sift_down(nbs: &mut [i32], start: usize, end: usize) {
     let mut root = start;
     while heap_left(root) <= end {
         let child = heap_left(root);
         let mut swp = root;
-        if nbs[swp] < nbs[child]{
+        if nbs[swp] < nbs[child] {
             swp = child;
         }
-        if child+1 < end && nbs[swp] < nbs[child+1] {
+        if child + 1 < end && nbs[swp] < nbs[child + 1] {
             swp = child + 1;
         }
         if swp == root {
             return;
         } else {
-            swap(nbs,root,swp);
+            nbs.swap(root, swp);
             root = swp;
         }
     }
 }
 
 /// build the heap up
-fn sift_up(nbs: &mut Vec<i32>, start: usize, end: usize) {
+fn sift_up(nbs: &mut [i32], start: usize, end: usize) {
     let mut child = end;
     while child > start {
         let p = heap_parent(child);
         if nbs[p] < nbs[child] {
-            swap(nbs, p, child);
+            nbs.swap(p, child);
             child = p;
         } else {
             return;
@@ -313,36 +311,30 @@ fn sift_up(nbs: &mut Vec<i32>, start: usize, end: usize) {
 }
 
 /// index of parent in heap
-fn heap_parent (i: usize) -> usize {
-    (i-1)/2
+fn heap_parent(i: usize) -> usize {
+    (i - 1) / 2
 }
 
 /// index of left child in heap
-fn heap_left (i: usize) -> usize {
-    2*i + 1
+fn heap_left(i: usize) -> usize {
+    2 * i + 1
 }
 
 /// index of right child in heap
-fn heap_right (i: usize) -> usize {
-    2*i + 2
-}
-
-/// swap two numbers
-fn swap(nbs: &mut Vec<i32>, low: usize, high: usize) {
-    let tmp: i32 = nbs[low];
-    nbs[low] = nbs[high];
-    nbs[high] = tmp;
+#[allow(dead_code)]
+fn heap_right(i: usize) -> usize {
+    2 * i + 2
 }
 
 /// reverse in place
 pub fn reverse(nbs: &mut Vec<i32>) {
-    if nbs.len() > 0 {
+    if !nbs.is_empty() {
         let mut i = 0;
         let mut j = nbs.len() - 1;
         while i < j {
-            swap(nbs, i, j);
-            i = i + 1;
-            j = j - 1;
+            nbs.swap(i, j);
+            i += 1;
+            j -= 1;
         }
     }
 }
@@ -353,15 +345,15 @@ mod tests {
 
     #[test]
     fn test_missing_number() {
-        assert_eq!(None, missing_number(&vec!(1, 2, 3), 1, 3));
-        assert_eq!(None, missing_number(&vec!(3, 2, 1), 1, 3));
-        assert_eq!(Some(2), missing_number(&vec!(1, 3), 1, 3));
-        assert_eq!(Some(2), missing_number(&vec!(1, 3, 1, 3), 1, 3));
-        assert_eq!(Some(1), missing_number(&vec!(2, 3), 1, 3));
-        assert_eq!(Some(3), missing_number(&vec!(1, 2), 1, 3));
-        assert_eq!(Some(2), missing_number(&vec!(3, 1), 1, 3));
-        assert_eq!(Some(1), missing_number(&vec!(3, 2), 1, 3));
-        assert_eq!(Some(3), missing_number(&vec!(2, 1), 1, 3));
+        assert_eq!(None, missing_number(&[1, 2, 3], 1, 3));
+        assert_eq!(None, missing_number(&[3, 2, 1], 1, 3));
+        assert_eq!(Some(2), missing_number(&[1, 3], 1, 3));
+        assert_eq!(Some(2), missing_number(&[1, 3, 1, 3], 1, 3));
+        assert_eq!(Some(1), missing_number(&[2, 3], 1, 3));
+        assert_eq!(Some(3), missing_number(&[1, 2], 1, 3));
+        assert_eq!(Some(2), missing_number(&[3, 1], 1, 3));
+        assert_eq!(Some(1), missing_number(&[3, 2], 1, 3));
+        assert_eq!(Some(3), missing_number(&[2, 1], 1, 3));
         assert_eq!(
             Some(100),
             missing_number(&((1..100).collect::<Vec<i32>>()), 1, 100)
@@ -371,52 +363,46 @@ mod tests {
     #[test]
     #[should_panic(expected = "4 wasn't in range 1-3")]
     fn test_missing_number_panic() {
-        assert_eq!(None, missing_number(&vec!(1, 2, 3, 4), 1, 3));
+        assert_eq!(None, missing_number(&[1, 2, 3, 4], 1, 3));
     }
 
     #[test]
     fn test_duplicate() {
-        assert_eq!(None, duplicate(&vec!(1, 2, 3)));
-        assert_eq!(Some(1), duplicate(&vec!(1, 2, 3, 1)));
-        assert_eq!(Some(1), duplicate(&vec!(1, 1, 2, 3)));
-        assert_eq!(Some(3), duplicate(&vec!(1, 2, 3, 3)));
+        assert_eq!(None, duplicate(&[1, 2, 3]));
+        assert_eq!(Some(1), duplicate(&[1, 2, 3, 1]));
+        assert_eq!(Some(1), duplicate(&[1, 1, 2, 3]));
+        assert_eq!(Some(3), duplicate(&[1, 2, 3, 3]));
     }
 
     #[test]
     fn test_duplicates() {
-        assert_eq!(IntSet::new(), duplicates(&vec!(1, 2, 3)));
-        assert_eq!(IntSet::from_vec(vec!(1)), duplicates(&vec!(1, 2, 3, 1)));
-        assert_eq!(IntSet::from_vec(vec!(1)), duplicates(&vec!(1, 1, 2, 3)));
-        assert_eq!(IntSet::from_vec(vec!(3)), duplicates(&vec!(1, 2, 3, 3)));
-        assert_eq!(
-            IntSet::from_vec(vec!(1, 3)),
-            duplicates(&vec!(1, 1, 2, 3, 3))
-        );
+        assert_eq!(IntSet::new(), duplicates(&[1, 2, 3]));
+        assert_eq!(IntSet::from_vec(vec!(1)), duplicates(&[1, 2, 3, 1]));
+        assert_eq!(IntSet::from_vec(vec!(1)), duplicates(&[1, 1, 2, 3]));
+        assert_eq!(IntSet::from_vec(vec!(3)), duplicates(&[1, 2, 3, 3]));
+        assert_eq!(IntSet::from_vec(vec!(1, 3)), duplicates(&[1, 1, 2, 3, 3]));
     }
 
     #[test]
     fn test_range() {
-        assert_eq!((0, 0), range(&vec!(0)));
-        assert_eq!((0, 1), range(&vec!(0, 1)));
-        assert_eq!((-1, 1), range(&vec!(0, 1, -1)));
+        assert_eq!((0, 0), range(&[0]));
+        assert_eq!((0, 1), range(&[0, 1]));
+        assert_eq!((-1, 1), range(&[0, 1, -1]));
     }
 
     #[test]
     #[should_panic(expected = "Empty array")]
     fn test_range_panic() {
-        assert_eq!((0, 0), range(&vec!()));
+        assert_eq!((0, 0), range(&[]));
     }
 
     #[test]
     fn test_pairs_product() {
         let e: Vec<(i32, i32)> = vec![];
-        assert_eq!(e, pairs_product(&vec!(), 2));
-        assert_eq!(vec!((1, 2)), pairs_product(&vec!(1, 2), 2));
-        assert_eq!(vec!((2, 3)), pairs_product(&vec!(1, 2, 3), 6));
-        assert_eq!(
-            vec!((2, 6), (3, 4)),
-            pairs_product(&vec!(1, 2, 3, 4, 6), 12)
-        );
+        assert_eq!(e, pairs_product(&[], 2));
+        assert_eq!(vec!((1, 2)), pairs_product(&[1, 2], 2));
+        assert_eq!(vec!((2, 3)), pairs_product(&[1, 2, 3], 6));
+        assert_eq!(vec!((2, 6), (3, 4)), pairs_product(&[1, 2, 3, 4, 6], 12));
     }
 
     #[test]

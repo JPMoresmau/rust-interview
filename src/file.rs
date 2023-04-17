@@ -1,6 +1,6 @@
 //! File operations
 //! Submitted to http://www.rosettacode.org/wiki/Append_a_record_to_the_end_of_a_text_file#Rust
- 
+
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::BufRead;
@@ -21,7 +21,6 @@ pub struct PasswordRecord {
     pub directory: String,
     pub shell: String,
 }
-
 
 impl PasswordRecord {
     /// new instance, cloning all fields
@@ -56,13 +55,13 @@ impl PasswordRecord {
 
     /// read record from line
     pub fn from_line(line: &str) -> PasswordRecord {
-        let sp: Vec<&str> = line.split(":").collect();
+        let sp: Vec<&str> = line.split(':').collect();
         if sp.len() < 7 {
             panic!("Less than 7 fields found");
         } else {
             let uid = sp[2].parse().expect("Cannot parse uid");
             let gid = sp[3].parse().expect("Cannot parse gid");
-            let gecos = sp[4].split(",").collect();
+            let gecos = sp[4].split(',').collect();
             PasswordRecord::new(sp[0], sp[1], uid, gid, gecos, sp[5], sp[6])
         }
     }
@@ -104,7 +103,7 @@ pub fn append_password_file(file_name: &str, recs: &Vec<PasswordRecord>) -> Resu
 fn write_records(f: File, recs: &Vec<PasswordRecord>) -> Result<()> {
     let mut writer = BufWriter::new(f);
     for rec in recs {
-        write!(writer, "{}\n", rec.to_line())?;
+        writeln!(writer, "{}", rec.to_line())?;
     }
     Ok(())
 }
