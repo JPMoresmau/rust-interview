@@ -1,4 +1,4 @@
-use itertools::Itertools;
+use std::collections::HashSet;
 
 type IntPoint = (i64, i64);
 
@@ -8,30 +8,13 @@ fn slope(p1: &IntPoint, p2: &IntPoint) -> f64 {
     (p2.1 - p1.1) as f64 / (p2.0 - p1.0) as f64
 }
 
-/// Are the given points all on the same slope?
-fn same_slope(points: &[&IntPoint]) -> bool {
-    if points.len() < 3 {
-        return true;
-    }
-    // Calculate the slopes for all combinations of 2 points.
-    let mut slopes = points
-        .iter()
-        .tuple_combinations()
-        .map(|(p1, p2)| (slope(p1, p2)));
-    let fst = slopes.next().unwrap();
-    for n in slopes {
-        // Warning this may not work well in the face of rounding errors.
-        if fst != n {
-            return false;
-        }
-    }
-    true
+/// Calculate the y-intersect of a line given a point and the slope.
+fn y_intersect(p1: &IntPoint, slope: f64) -> f64 {
+    p1.1 as f64 - (slope * p1.0 as f64)
 }
 
 /// Number of points on the same line.
 /// <https://buttondown.email/cassidoo/archive/9753/>
-/// Cheating maybe because we're using itertools.
-/// Not performance optimized.
 pub fn max_points_on_line(points: &[IntPoint]) -> usize {
     // No point provided.
     if points.is_empty() {
@@ -41,18 +24,50 @@ pub fn max_points_on_line(points: &[IntPoint]) -> usize {
     if points.len() == 1 {
         return 1;
     }
-    // Brute force approach: find ensembles with the same slope.
-    let mut sz = points.len();
-    while sz > 2 {
-        for c in points.iter().combinations(sz) {
-            if same_slope(&c) {
-                return sz;
-            }
+    // Calculate slopes and y intersects for all combination of points, just keeping the point indices.
+    let mut slopes: Vec<((f64, f64), usize, usize)> = points
+        .iter()
+        .enumerate()
+        .flat_map(|(ix1, p1)| {
+            points
+                .iter()
+                .enumerate()
+                .skip(ix1 + 1)
+                .map(move |(ix2, p2)| {
+                    let slope = slope(p1, p2);
+                    let y = y_intersect(p1, slope);
+                    ((slope, y), ix1, ix2)
+                })
+        })
+        .collect();
+    // Sort vec so that all points on the same line are next to each other.
+    slopes.sort_unstable_by(|(a, _, _), (b, _, _)| a.partial_cmp(b).unwrap());
+    // Put all indices for the same line in a Hashset (we cannot use f64 directly as keys).
+    let mut max = 2;
+    let mut line = HashSet::new();
+    let mut it = slopes.into_iter();
+    // First point, safe to get since if there's less that one point we returned earlier.
+    let mut fst = it.next().unwrap();
+    line.insert(fst.1);
+    line.insert(fst.2);
+    for f in it {
+        // Same line as before.
+        if f.0 == fst.0 {
+            // Insert point.
+            line.insert(f.1);
+            line.insert(f.2);
+            // Number of points
+            max = max.max(line.len());
+        // New line.
+        } else {
+            fst = f;
+            line.clear();
+            // First point of new line.
+            line.insert(fst.1);
+            line.insert(fst.2);
         }
-        // try smaller ensembles.
-        sz -= 1;
     }
-    2
+    max
 }
 
 #[cfg(test)]
