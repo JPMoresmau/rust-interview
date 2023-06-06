@@ -157,6 +157,17 @@ fn eval_term(t: &Node) -> f64 {
     }
 }
 
+pub fn can_make_arithmetic_progression(mut arr: Vec<i32>) -> bool {
+    arr.sort();
+    let diff = arr[1]-arr[0];
+    for i in 2..arr.len() {
+        if arr[i]-arr[i-1] != diff {
+            return false
+        }
+    }
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -174,5 +185,11 @@ mod tests {
         assert_eq!(-9.0 / 4.0, eval("2*-3--4+-.25"));
         assert_eq!(1.5, eval("1 - 5 * 2 / 20 + 1"));
         assert_eq!(3.5, eval("2 * (3 + ((5) / (7 - 11)))"));
+    }
+
+    #[test]
+    fn test_can_make_arithmetic_progression(){
+        assert!(can_make_arithmetic_progression(vec![3,5,1]));
+        assert!(!can_make_arithmetic_progression(vec![2,4,1]));
     }
 }

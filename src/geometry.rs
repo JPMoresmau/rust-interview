@@ -2,6 +2,24 @@ use std::collections::HashSet;
 
 type IntPoint = (i64, i64);
 
+pub fn check_straight_line(coordinates: Vec<Vec<i32>>) -> bool {
+    if coordinates.len()<3{
+        return true;
+    }
+    if let Some(p1) = coordinates.get(0){
+        if let Some(p2) = coordinates.get(1){
+            let slope1 = (p2[1] - p1[1]) as f32 /  (p2[0] - p1[0]) as f32;
+            for c in &coordinates[2..] {
+                let slope2 = (c[1] - p1[1]) as f32 /  (c[0] - p1[0]) as f32;
+                if slope2 != slope1 && (slope1.is_finite() || slope2.is_finite()){
+                    return false;
+                } 
+            }
+        }
+    }
+    true
+}
+
 /// Calculate the slope between two points.
 /// We return a float to not lose precision, which is NOT `Eq` or `Hash`.
 fn slope(p1: &IntPoint, p2: &IntPoint) -> f64 {
@@ -88,5 +106,14 @@ mod tests {
             4,
             max_points_on_line(&[(1, 1), (3, 2), (4, 1), (2, 3), (1, 4), (2, 0)])
         );
+    }
+
+    #[test]
+    fn test_check_straight_line() {
+        assert!(check_straight_line(vec![vec![1,2],vec![2,3],vec![3,4],vec![4,5],vec![5,6],vec![6,7]]));
+        assert!(!check_straight_line(vec![vec![1,1],vec![2,2],vec![3,4],vec![4,5],vec![5,6],vec![7,7]]));
+        assert!(check_straight_line(vec![vec![0,0],vec![0,1],vec![0,-1]]));
+
+        assert!(!check_straight_line(vec![vec![0,0],vec![0,5],vec![5,5],vec![5,0]]));
     }
 }
