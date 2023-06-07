@@ -80,6 +80,32 @@ fn permute(mut v: Vec<char>, st: usize, s: &mut HashSet<Vec<char>>) {
     }
 }
 
+pub fn min_distance(word1: String, word2: String) -> i32 {
+    let c1: &[u8] = word1.as_bytes();
+    let c2: &[u8] = word2.as_bytes();
+    let mut m = vec![vec![0i32; c2.len() + 1]; c1.len() + 1];
+    for i in 0..c1.len() {
+        m[i + 1][0] = i as i32 + 1;
+    }
+    for i in 0..c2.len() {
+        m[0][i + 1] = i as i32 + 1;
+    }
+
+    for j in 0..c2.len() {
+        for i in 0..c1.len() {
+            if c1[i] == c2[j] {
+                m[i + 1][j + 1] = m[i][j];
+            } else {
+                m[i + 1][j + 1] = 1 + m[i][j + 1] // deletion
+                    .min(m[i + 1][j]) // insertion
+                    .min(m[i][j]); // substitution
+            }
+        }
+    }
+
+    m[c1.len()][c2.len()]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -120,5 +146,13 @@ mod tests {
                 .map(|s| String::from(*s)),
         );
         assert_eq!(s, permutations("abc"));
+    }
+
+    #[test]
+    fn test_min_distance() {
+        assert_eq!(0, min_distance("horse".into(), "horse".into()));
+        assert_eq!(3, min_distance("horse".into(), "ros".into()));
+        assert_eq!(5, min_distance("intention".into(), "execution".into()));
+        assert_eq!(3, min_distance("kitten".into(), "sitting".into()));
     }
 }

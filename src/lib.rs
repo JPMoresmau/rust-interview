@@ -1,4 +1,5 @@
 pub mod array;
+pub mod bit;
 pub mod btree;
 pub mod calc;
 pub mod deranged;
@@ -9,6 +10,7 @@ pub mod math;
 pub mod string;
 
 pub use crate::array::*;
+pub use crate::bit::*;
 pub use crate::btree::*;
 pub use crate::calc::*;
 pub use crate::deranged::*;
