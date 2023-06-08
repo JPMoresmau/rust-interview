@@ -7,6 +7,7 @@ pub mod file;
 pub mod geometry;
 pub mod llist;
 pub mod math;
+pub mod matrix;
 pub mod string;
 
 pub use crate::array::*;
@@ -18,4 +19,5 @@ pub use crate::file::*;
 pub use crate::geometry::*;
 pub use crate::llist::*;
 pub use crate::math::*;
+pub use crate::matrix::*;
 pub use crate::string::*;
