@@ -15,7 +15,7 @@ pub fn angle_difference(bearing1: f64, bearing2: f64) -> f64 {
     }
 }
 
-///! calculate pi with algebraic/geometric mean
+/// Calculate pi with algebraic/geometric mean
 pub fn pi(n: usize) -> f64 {
     let mut a: f64 = 1.0;
     let two: f64 = 2.0;

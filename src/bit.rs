@@ -1,4 +1,3 @@
-
 pub fn min_flips(a: i32, b: i32, c: i32) -> i32 {
     let mut i = 1;
     let max = a.max(b).max(c);
@@ -17,10 +16,10 @@ pub fn min_flips(a: i32, b: i32, c: i32) -> i32 {
                 flips += 1;
             }
         }
-        if i > max || i == i32::MAX{
+        if i > max || i == i32::MAX {
             break;
         }
-        i = i << 1;
+        i <<= 1;
     }
     flips
 }

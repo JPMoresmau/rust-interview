@@ -10,7 +10,7 @@ pub mod math;
 pub mod matrix;
 pub mod string;
 
-pub use crate::array::*;
+//pub use crate::array::*;
 pub use crate::bit::*;
 pub use crate::btree::*;
 pub use crate::calc::*;

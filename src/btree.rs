@@ -2,7 +2,6 @@
 use std::cmp::max;
 use std::iter::FromIterator;
 use std::iter::IntoIterator;
-use std::mem;
 
 /// The Binary Search Tree, possibly empty
 #[derive(Debug)]
@@ -33,7 +32,7 @@ impl<'a, K: Eq + PartialOrd, V> BTree<K, V> {
 
     /// insert key/value
     pub fn insert(&mut self, key: K, value: V) {
-        let oroot = mem::replace(&mut self.root, None);
+        let oroot = self.root.take();
         let newroot = insert_into_node(oroot, key, value);
         self.root = Some(Box::new(newroot));
     }
@@ -50,7 +49,7 @@ impl<'a, K: Eq + PartialOrd, V> BTree<K, V> {
 
     /// delete a key and return the value if it was present
     pub fn delete(&'a mut self, key: &K) -> Option<V> {
-        let r = mem::replace(&mut self.root, None);
+        let r = self.root.take();
         let (r, v) = delete_node(r, key);
         self.root = r;
         v
@@ -136,10 +135,10 @@ fn insert_into_node<K: Eq + PartialOrd, V>(
             if node.key == key {
                 node.value = value;
             } else if key < node.key {
-                let left = mem::replace(&mut node.left, None);
+                let left = node.left.take();
                 node.left = Some(Box::new(insert_into_node(left, key, value)));
             } else {
-                let right = mem::replace(&mut node.right, None);
+                let right = node.right.take();
                 node.right = Some(Box::new(insert_into_node(right, key, value)));
             };
             *node
@@ -192,12 +191,12 @@ fn delete_node<K: Eq + PartialOrd, V>(
                 };
                 (n, v)
             } else if *key < node.key {
-                let left = mem::replace(&mut node.left, None);
+                let left = node.left.take();
                 let (n, v) = delete_node(left, key);
                 node.left = n;
                 (Some(node), v)
             } else {
-                let right = mem::replace(&mut node.right, None);
+                let right = node.right.take();
                 let (n, v) = delete_node(right, key);
                 node.right = n;
                 (Some(node), v)

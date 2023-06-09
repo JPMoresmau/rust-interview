@@ -91,9 +91,9 @@ pub fn min_distance(word1: String, word2: String) -> i32 {
         m[0][i + 1] = i as i32 + 1;
     }
 
-    for j in 0..c2.len() {
-        for i in 0..c1.len() {
-            if c1[i] == c2[j] {
+    for (j, cj) in c2.iter().enumerate() {
+        for (i, ci) in c1.iter().enumerate() {
+            if ci == cj {
                 m[i + 1][j + 1] = m[i][j];
             } else {
                 m[i + 1][j + 1] = 1 + m[i][j + 1] // deletion
@@ -104,6 +104,15 @@ pub fn min_distance(word1: String, word2: String) -> i32 {
     }
 
     m[c1.len()][c2.len()]
+}
+
+pub fn next_greatest_letter(letters: Vec<char>, target: char) -> char {
+    let ix = letters.partition_point(|x| x <= &target);
+    if ix < letters.len() {
+        letters[ix]
+    } else {
+        letters[0]
+    }
 }
 
 #[cfg(test)]
@@ -154,5 +163,12 @@ mod tests {
         assert_eq!(3, min_distance("horse".into(), "ros".into()));
         assert_eq!(5, min_distance("intention".into(), "execution".into()));
         assert_eq!(3, min_distance("kitten".into(), "sitting".into()));
+    }
+
+    #[test]
+    fn test_next_greatest_letter() {
+        assert_eq!('c', next_greatest_letter(vec!['c', 'f', 'j'], 'a'));
+        assert_eq!('f', next_greatest_letter(vec!['c', 'f', 'j'], 'c'));
+        assert_eq!('x', next_greatest_letter(vec!['x', 'x', 'y', 'y'], 'z'));
     }
 }
