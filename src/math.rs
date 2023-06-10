@@ -57,6 +57,27 @@ pub fn pi(n: usize) -> BigRational {
     4.0 * a.powi(2) / (1.0-s)
 }*/
 
+/// https://leetcode.com/problems/maximum-value-at-a-given-index-in-a-bounded-array/
+pub fn max_value(n: i32, index: i32, max_sum: i32) -> i32 {
+    let floor = 1.max(max_sum / n - ((index - n).abs().max(index)));
+    let mut sum = floor * n;
+    let mut amp = 1;
+    let mut res = floor;
+    if sum < max_sum {
+        'outer: loop {
+            res += 1;
+            sum += n.min(index + amp + 1) - 0.max(index - amp);
+            if sum >= max_sum {
+                break 'outer;
+            }
+            if index - amp > 0 || index + amp < n - 1 {
+                amp += 1;
+            }
+        }
+    }
+    res
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -93,5 +114,17 @@ mod tests {
     // see also https://crates.io/crates/float-cmp
     fn approx_eq(f1: f64, f2: f64) {
         assert!((f2 - f1).abs() < 0.0001, "{} != {}", f1, f2)
+    }
+
+    #[test]
+    fn test_max_value() {
+        assert_eq!(2, max_value(4, 2, 6));
+        assert_eq!(3, max_value(6, 1, 10));
+        assert_eq!(7, max_value(3, 2, 18));
+        assert_eq!(1, max_value(4, 0, 4));
+        assert_eq!(10102750, max_value(9, 0, 90924720));
+        assert_eq!(271698267, max_value(3, 0, 815094800));
+        assert_eq!(8, max_value(5, 4, 30));
+        assert_eq!(11049, max_value(8067, 368, 59432211));
     }
 }
