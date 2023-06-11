@@ -339,6 +339,51 @@ pub fn reverse(nbs: &mut Vec<i32>) {
     }
 }
 
+/// https://leetcode.com/problems/snapshot-array/
+pub struct SnapshotArray {
+    data: Vec<Vec<(i32,i32)>>,
+    snap_id: i32,
+}
+
+
+/** 
+ * `&self` means the method takes an immutable reference.
+ * If you need a mutable reference, change it to `&mut self` instead.
+ */
+impl SnapshotArray {
+
+    pub fn new(length: i32) -> Self {
+        SnapshotArray { data: vec![vec![]; length as usize], snap_id: 0 }
+    }
+    
+    pub fn set(&mut self, index: i32, val: i32) {
+        let e = &mut self.data[index as usize];
+        if let Some (l) = e.last_mut() {
+            if l.0==self.snap_id{
+                l.1 = val;
+                return;
+            }
+        }
+        e.push((self.snap_id, val));
+    }
+    
+    pub fn snap(&mut self) -> i32 {
+        self.snap_id += 1;
+        self.snap_id-1
+    }
+    
+    pub fn get(&self, index: i32, snap_id: i32) -> i32 {
+      let v = &self.data[index as usize];
+        match v.binary_search_by_key(&snap_id, |a| a.0) {
+            Ok(ix) => v[ix].1,
+            Err(ix) if ix>0 => v[ix-1].1,
+            _ => 0
+        }
+       
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -463,5 +508,19 @@ mod tests {
         let mut nbs = vec![1];
         reverse(&mut nbs);
         assert_eq!(vec!(1), nbs);
+    }
+
+    #[test]
+    fn test_snapshot(){
+        let mut snapshot = SnapshotArray::new(3); // set the length to be 3
+        snapshot.set(0,5);  // Set array[0] = 5
+        assert_eq!(0,snapshot.snap());  // Take a snapshot, return snap_id = 0
+        assert_eq!(5, snapshot.get(0,0)); 
+        snapshot.set(0,4);
+        snapshot.set(0,6);
+        assert_eq!(5, snapshot.get(0,0));  // Get the value of array[0] with snap_id = 0, return 5
+        assert_eq!(6, snapshot.get(0,1)); 
+        assert_eq!(0, snapshot.get(1,1)); 
+        assert_eq!(0, snapshot.get(1,0)); 
     }
 }
