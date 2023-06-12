@@ -78,6 +78,31 @@ pub fn max_value(n: i32, index: i32, max_sum: i32) -> i32 {
     res
 }
 
+/// https://leetcode.com/problems/summary-ranges/
+pub fn summary_ranges(nums: Vec<i32>) -> Vec<String> {
+    let mut ranges = Vec::new();
+    let mut range = |start: i32, current: i32| {
+        if current == start {
+            ranges.push(current.to_string());
+        } else {
+            ranges.push(format!("{start}->{current}"));
+        }
+    };
+    if !nums.is_empty() {
+        let mut start = nums[0];
+        let mut current = start;
+        for i in &nums[1..] {
+            if *i > current + 1 {
+                range(start, current);
+                start = *i;
+            }
+            current = *i;
+        }
+        range(start, current);
+    }
+    ranges
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -126,5 +151,17 @@ mod tests {
         assert_eq!(271698267, max_value(3, 0, 815094800));
         assert_eq!(8, max_value(5, 4, 30));
         assert_eq!(11049, max_value(8067, 368, 59432211));
+    }
+
+    #[test]
+    fn test_summary_ranges() {
+        assert_eq!(
+            vec!["0->2", "4->5", "7"],
+            summary_ranges(vec![0, 1, 2, 4, 5, 7])
+        );
+        assert_eq!(
+            vec!["0", "2->4", "6", "8->9"],
+            summary_ranges(vec![0, 2, 3, 4, 6, 8, 9])
+        );
     }
 }
