@@ -227,6 +227,52 @@ fn depth<K, V>(onode: &Option<Box<BNode<K, V>>>) -> usize {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub struct TreeNode {
+    pub val: i32,
+    pub left: Option<Rc<RefCell<TreeNode>>>,
+    pub right: Option<Rc<RefCell<TreeNode>>>,
+}
+
+impl TreeNode {
+    #[inline]
+    pub fn new(val: i32) -> Self {
+        TreeNode {
+            val,
+            left: None,
+            right: None,
+        }
+    }
+}
+use std::cell::RefCell;
+use std::rc::Rc;
+
+/// https://leetcode.com/problems/minimum-absolute-difference-in-bst/
+pub fn get_minimum_difference(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
+    if root.is_some() {
+        let mut v = Vec::new();
+        fn add(v: &mut Vec<i32>, node: &Option<Rc<RefCell<TreeNode>>>) {
+            if let Some(node) = node {
+                let node = node.as_ref().borrow();
+                v.push(node.val);
+                add(v, &node.left);
+                add(v, &node.right);
+            }
+        }
+        add(&mut v, &root);
+        v.sort();
+        let mut min = i32::MAX;
+        let mut prev = &v[0];
+        for ix in &v[1..] {
+            min = min.min(ix - prev);
+            prev = ix;
+        }
+        min
+    } else {
+        0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -323,5 +369,30 @@ mod tests {
         assert_eq!(Some((&10, &"10")), it.next());
         assert_eq!(Some((&13, &"13")), it.next());
         assert_eq!(Some((&14, &"14")), it.next());
+    }
+
+    #[test]
+    fn test_get_minimum_difference() {
+        let mut root = TreeNode::new(4);
+        let mut c1 = TreeNode::new(2);
+        let c2 = TreeNode::new(6);
+        let c12 = TreeNode::new(1);
+        let c13 = TreeNode::new(3);
+        c1.left = Some(Rc::new(RefCell::new(c12)));
+        c1.right = Some(Rc::new(RefCell::new(c13)));
+        root.left = Some(Rc::new(RefCell::new(c1)));
+        root.right = Some(Rc::new(RefCell::new(c2)));
+        assert_eq!(1, get_minimum_difference(Some(Rc::new(RefCell::new(root)))));
+
+        let mut root = TreeNode::new(1);
+        let c1 = TreeNode::new(0);
+        let mut c2 = TreeNode::new(48);
+        let c12 = TreeNode::new(12);
+        let c13 = TreeNode::new(49);
+        c2.left = Some(Rc::new(RefCell::new(c12)));
+        c2.right = Some(Rc::new(RefCell::new(c13)));
+        root.left = Some(Rc::new(RefCell::new(c1)));
+        root.right = Some(Rc::new(RefCell::new(c2)));
+        assert_eq!(1, get_minimum_difference(Some(Rc::new(RefCell::new(root)))));
     }
 }
