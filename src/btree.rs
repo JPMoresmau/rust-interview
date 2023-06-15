@@ -273,6 +273,36 @@ pub fn get_minimum_difference(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
     }
 }
 
+/// <https://leetcode.com/problems/maximum-level-sum-of-a-binary-tree/>
+pub fn max_level_sum(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
+    if root.is_some() {
+        let mut v = Vec::new();
+        fn add(v: &mut Vec<i32>, level: usize, node: &Option<Rc<RefCell<TreeNode>>>) {
+            if let Some(node) = node {
+                let node = node.as_ref().borrow();
+                while v.len() < level + 1 {
+                    v.push(0);
+                }
+                v[level] += node.val;
+                add(v, level + 1, &node.left);
+                add(v, level + 1, &node.right);
+            }
+        }
+        add(&mut v, 0, &root);
+        let mut max = i32::MIN;
+        let mut max_ix = -1;
+        for (ix, s) in v.into_iter().enumerate() {
+            if s > max {
+                max = s;
+                max_ix = ix as i32;
+            }
+        }
+        max_ix + 1
+    } else {
+        0
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -394,5 +424,31 @@ mod tests {
         root.left = Some(Rc::new(RefCell::new(c1)));
         root.right = Some(Rc::new(RefCell::new(c2)));
         assert_eq!(1, get_minimum_difference(Some(Rc::new(RefCell::new(root)))));
+    }
+
+    #[test]
+    fn test_max_level_sum() {
+        let mut root = TreeNode::new(1);
+        let mut c1 = TreeNode::new(7);
+        let c2 = TreeNode::new(0);
+        let c12 = TreeNode::new(7);
+        let c13 = TreeNode::new(-8);
+        c1.left = Some(Rc::new(RefCell::new(c12)));
+        c1.right = Some(Rc::new(RefCell::new(c13)));
+        root.left = Some(Rc::new(RefCell::new(c1)));
+        root.right = Some(Rc::new(RefCell::new(c2)));
+        assert_eq!(2, max_level_sum(Some(Rc::new(RefCell::new(root)))));
+
+        let mut root = TreeNode::new(989);
+        let mut c2 = TreeNode::new(10250);
+        let c12 = TreeNode::new(98693);
+        let mut c13 = TreeNode::new(-89388);
+        let c131 = TreeNode::new(-32127);
+        c13.right = Some(Rc::new(RefCell::new(c131)));
+        c2.left = Some(Rc::new(RefCell::new(c12)));
+        c2.right = Some(Rc::new(RefCell::new(c13)));
+
+        root.right = Some(Rc::new(RefCell::new(c2)));
+        assert_eq!(2, max_level_sum(Some(Rc::new(RefCell::new(root)))));
     }
 }
