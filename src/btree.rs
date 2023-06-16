@@ -303,6 +303,72 @@ pub fn max_level_sum(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
     }
 }
 
+pub struct Solution {}
+
+impl Solution {
+    /// <https://leetcode.com/problems/number-of-ways-to-reorder-array-to-get-same-bst/>
+    const M: i64 = 1_000_000_007;
+
+    pub fn num_of_ways(nums: Vec<i32>) -> i32 {
+        let len = nums.len();
+        let mut pascal = vec![vec![0; len]; len];
+        for (i, p) in pascal.iter_mut().enumerate().take(len) {
+            p[0] = 1;
+            p[i] = 1;
+        }
+        for i in 2..len {
+            for j in 1..i {
+                pascal[i][j] = (pascal[i - 1][j - 1] + pascal[i - 1][j]) % Solution::M;
+            }
+        }
+        ((Solution::dfs(nums, &pascal) - 1) % Solution::M) as i32
+    }
+
+    fn dfs(nums: Vec<i32>, pascal: &[Vec<i64>]) -> i64 {
+        let len = nums.len();
+        if len < 3 {
+            return 1;
+        }
+        let root = nums[0];
+        let (left, right): (Vec<i32>, Vec<i32>) = nums.into_iter().skip(1).partition(|i| i < &root);
+        let left_len = left.len();
+        let left_dfs = Solution::dfs(left, pascal);
+        let right_dfs = Solution::dfs(right, pascal);
+        let coef = pascal[len - 1][left_len];
+        (((left_dfs * right_dfs) % Solution::M) * coef) % Solution::M
+    }
+
+    /*fn num_of_ways_impl(nums: Vec<i32>, m: &mut HashMap<i32,i32>) -> i32 {
+        if nums.len() < 3 {
+            return 1;
+        }
+        let root = nums[0];
+        let len = nums.len() as i32-1;
+        let (left, right):(Vec<i32>,Vec<i32>) = nums.into_iter().skip(1).partition(|i| i < &root);
+
+        let left_len = left.len() as i32;
+        let coef = Solution::factorial(len, m) /
+            (Solution::factorial(left_len, m) * Solution::factorial(len-left_len, m));
+        let left_num = Solution::num_of_ways_impl(left,m);
+        let right_num = Solution::num_of_ways_impl(right,m);
+
+        ((coef * ((left_num * right_num) % 1_000_000_007))) % 1_000_000_007
+
+    }
+
+    pub fn factorial(n: i32, m: &mut HashMap<i32,i32>) -> i32 {
+        if n == 0  || n == 1 {
+            return 1;
+        }
+        if let Some(f) = m.get(&n){
+            return *f;
+        }
+        let f = n * Solution::factorial(n-1, m);
+        m.insert(n, f);
+        f
+    }*/
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -450,5 +516,20 @@ mod tests {
 
         root.right = Some(Rc::new(RefCell::new(c2)));
         assert_eq!(2, max_level_sum(Some(Rc::new(RefCell::new(root)))));
+    }
+
+    #[test]
+    fn test_num_of_ways() {
+        //assert_eq!(120, Solution::factorial(5, &mut HashMap::new()));
+        assert_eq!(1, Solution::num_of_ways(vec![2, 1, 3]));
+        assert_eq!(5, Solution::num_of_ways(vec![3, 4, 5, 1, 2]));
+        assert_eq!(0, Solution::num_of_ways(vec![1, 2, 3]));
+        assert_eq!(19, Solution::num_of_ways(vec![3, 1, 2, 5, 4, 6]));
+        assert_eq!(
+            216212978,
+            Solution::num_of_ways(vec![
+                9, 4, 2, 1, 3, 6, 5, 7, 8, 14, 11, 10, 12, 13, 16, 15, 17, 18
+            ])
+        );
     }
 }
