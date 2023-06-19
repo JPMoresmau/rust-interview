@@ -70,16 +70,16 @@ impl Solution {
             let v = grid[i][j];
             let mut cnt = 1;
             if i > 0 {
-                cnt += Solution::dps1(&grid, i - 1, j, dps, v);
+                cnt += Solution::dps1(grid, i - 1, j, dps, v);
             }
             if j > 0 {
-                cnt += Solution::dps1(&grid, i, j - 1, dps, v);
+                cnt += Solution::dps1(grid, i, j - 1, dps, v);
             } 
             if i < grid.len() - 1 {
-                cnt += Solution::dps1(&grid, i + 1, j, dps, v);
+                cnt += Solution::dps1(grid, i + 1, j, dps, v);
             } 
             if j < grid[0].len() - 1 {
-                cnt += Solution::dps1(&grid, i, j + 1, dps, v);
+                cnt += Solution::dps1(grid, i, j + 1, dps, v);
             }
             
             dps[i][j] = cnt % Solution::M;
@@ -89,7 +89,7 @@ impl Solution {
 
     fn dps1(grid: &Vec<Vec<i32>>, i: usize, j: usize, dps: &mut Vec<Vec<i64>>, v: i32) -> i64 {
         if grid[i][j] < v {
-            Solution::dps(&grid, i, j, dps)
+            Solution::dps(grid, i, j, dps)
         } else {
             0
         }

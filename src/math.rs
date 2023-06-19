@@ -103,6 +103,17 @@ pub fn summary_ranges(nums: Vec<i32>) -> Vec<String> {
     ranges
 }
 
+/// <https://leetcode.com/problems/find-the-highest-altitude/>
+pub fn largest_altitude(gain: Vec<i32>) -> i32 {
+    let mut alt = 0;
+    let mut max = 0;
+    for g in gain {
+        alt += g;
+        max = max.max(alt);
+    }
+    max
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -163,5 +174,10 @@ mod tests {
             vec!["0", "2->4", "6", "8->9"],
             summary_ranges(vec![0, 2, 3, 4, 6, 8, 9])
         );
+    }
+    #[test]
+    fn test_largest_altitude() {
+        assert_eq!(1, largest_altitude(vec![-5, 1, 5, 0, -7]));
+        assert_eq!(0, largest_altitude(vec![-4, -3, -2, -1, 4, 3, 2]));
     }
 }
