@@ -405,6 +405,38 @@ pub fn get_averages(nums: Vec<i32>, k: i32) -> Vec<i32> {
     res
 }
 
+/// <https://leetcode.com/problems/minimum-cost-to-make-array-equal/>
+pub fn min_cost(nums: Vec<i32>, cost: Vec<i32>) -> i64 {
+    if nums.is_empty() {
+        return 0;
+    }
+    let mut min_cost = 0;
+    let mut compound: Vec<(i64, i64)> = nums
+        .into_iter()
+        .zip(cost.into_iter())
+        .map(|(v, c)| (v as i64, c as i64))
+        .collect();
+    compound.sort_by_key(|t| t.0);
+    let mut target = compound[0];
+    let mut prefix = 0;
+    let mut suffix = target.1;
+    for (v, c) in compound.iter().skip(1) {
+        min_cost += ((v - target.0).abs()) * c;
+        suffix += c;
+    }
+
+    for (v, c) in compound.iter().skip(1) {
+        let diff = (v - target.0).abs();
+        prefix += target.1;
+        suffix -= target.1;
+        let cost = min_cost + (prefix * diff) - (suffix * diff);
+        min_cost = min_cost.min(cost);
+
+        target = (*v, *c);
+    }
+    min_cost
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -553,5 +585,11 @@ mod tests {
         );
         assert_eq!(vec![100000], get_averages(vec![100000], 0));
         assert_eq!(vec![-1], get_averages(vec![8], 10000));
+    }
+
+    #[test]
+    fn test_min_cost() {
+        assert_eq!(8, min_cost(vec![1, 3, 5, 2], vec![2, 3, 1, 14]));
+        assert_eq!(0, min_cost(vec![0, 0, 0, 0], vec![2, 3, 1, 14]));
     }
 }
