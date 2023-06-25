@@ -9,12 +9,14 @@ pub mod llist;
 pub mod math;
 pub mod matrix;
 pub mod string;
+pub mod dynamic;
 
 //pub use crate::array::*;
 pub use crate::bit::*;
 pub use crate::btree::*;
 pub use crate::calc::*;
 pub use crate::deranged::*;
+pub use crate::dynamic::*;
 pub use crate::file::*;
 pub use crate::geometry::*;
 pub use crate::llist::*;
