@@ -437,6 +437,20 @@ pub fn min_cost(nums: Vec<i32>, cost: Vec<i32>) -> i64 {
     min_cost
 }
 
+pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
+    let mut dp = vec![vec![1; 1001]; nums.len()];
+    let mut max = 0;
+    for (ix, i) in nums.iter().enumerate().skip(1) {
+        for (jx, j) in nums.iter().enumerate().take(ix) {
+            let diff = (i - j + 500) as usize;
+            let l = dp[jx][diff] + 1;
+            dp[ix][diff] = l;
+            max = max.max(l);
+        }
+    }
+    max
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -591,5 +605,12 @@ mod tests {
     fn test_min_cost() {
         assert_eq!(8, min_cost(vec![1, 3, 5, 2], vec![2, 3, 1, 14]));
         assert_eq!(0, min_cost(vec![0, 0, 0, 0], vec![2, 3, 1, 14]));
+    }
+
+    #[test]
+    fn test_longest_arith_seq_length() {
+        assert_eq!(4, longest_arith_seq_length(vec![3, 6, 9, 12]));
+        assert_eq!(3, longest_arith_seq_length(vec![9, 4, 7, 2, 10]));
+        assert_eq!(4, longest_arith_seq_length(vec![20, 1, 15, 3, 10, 5, 8]));
     }
 }
