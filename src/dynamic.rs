@@ -84,6 +84,32 @@ where
     lis
 }
 
+/// Coins game.
+/// <https://www.youtube.com/watch?v=KLBCUx1is2c>
+#[derive(Debug, Default, Clone)]
+struct Pick {
+    me: u32,
+    you: u32,
+}
+
+pub fn coins(coins: &[u32]) -> u32 {
+    let mut dp = vec![vec![Pick::default(); coins.len()]; coins.len()];
+    for (ix, i) in coins.iter().enumerate() {
+        dp[ix][ix].me = *i;
+    }
+    for p in 0..coins.len() {
+        for i in 0..coins.len() {
+            let j = i + p + 1;
+            if j < coins.len() {
+                dp[i][j].me = (dp[i + 1][j].you + coins[i]).max(dp[i][j - 1].you + coins[j]);
+                dp[i][j].you = dp[i + 1][j].me.min(dp[i][j - 1].me);
+            }
+        }
+    }
+
+    dp[0][dp.len() - 1].me
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -128,5 +154,10 @@ mod tests {
             vec!['A', 'B', 'O', 'R', 'T'],
             lis(&['C', 'A', 'R', 'B', 'O', 'H', 'Y', 'D', 'R', 'A', 'T', 'E'])
         );
+    }
+
+    #[test]
+    fn test_coins() {
+        assert_eq!(105, coins(&[5, 10, 100, 25]));
     }
 }
