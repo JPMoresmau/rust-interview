@@ -14,6 +14,7 @@ pub fn bowling(pins: &[i32]) -> i32 {
     max
 }
 
+/// Longest common subsequence.
 /// <https://www.youtube.com/watch?v=KLBCUx1is2c>
 pub fn lcs<T>(a: &[T], b: &[T]) -> Vec<T>
 where
@@ -49,6 +50,40 @@ where
     lcs
 }
 
+/// Longest incrementing subsequence.
+/// <https://www.youtube.com/watch?v=KLBCUx1is2c>
+pub fn lis<T>(a: &[T]) -> Vec<T>
+where
+    T: Ord + Copy,
+{
+    if a.is_empty() {
+        return vec![];
+    }
+    let mut dp = vec![vec![]; a.len()];
+    let mut lis = vec![];
+    for i in (0..a.len()).rev() {
+        dp[i].push(a[i]);
+        for j in (i + 1)..a.len() {
+            if a[j] > a[i] && dp[j].len() >= dp[i].len() {
+                let v;
+                // SAFETY: i != j && dp[i] is distinct from dp[j] so modifying dp[i] while reading dp[j] is safe.
+                unsafe {
+                    v = &mut *(&mut dp[i] as *mut Vec<T>);
+                }
+                v.clear();
+                v.push(a[i]);
+                v.extend(&dp[j]);
+            }
+        }
+        if dp[i].len() > lis.len() {
+            lis.clear();
+            lis.extend(&dp[i]);
+        }
+    }
+
+    lis
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -78,6 +113,20 @@ mod tests {
                 &['H', 'I', 'E', 'R', 'O', 'G', 'L', 'Y', 'P', 'H', 'O', 'L', 'O', 'G', 'Y'],
                 &['M', 'I', 'C', 'H', 'A', 'E', 'L', 'A', 'N', 'G', 'E', 'L', 'O']
             )
+        );
+    }
+
+    #[test]
+    fn test_lis() {
+        assert_eq!(Vec::<char>::new(), lis(&[]));
+        assert_eq!(vec!['A'], lis(&['H', 'A']));
+        assert_eq!(
+            vec!['E', 'M', 'P', 'T', 'Y'],
+            lis(&['E', 'M', 'P', 'A', 'T', 'H', 'Y'])
+        );
+        assert_eq!(
+            vec!['A', 'B', 'O', 'R', 'T'],
+            lis(&['C', 'A', 'R', 'B', 'O', 'H', 'Y', 'D', 'R', 'A', 'T', 'E'])
         );
     }
 }
