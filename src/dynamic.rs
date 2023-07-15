@@ -110,6 +110,46 @@ pub fn coins(coins: &[u32]) -> u32 {
     dp[0][dp.len() - 1].me
 }
 
+pub enum Term {
+    Plus,
+    Times,
+}
+
+fn calc(t: &Term, a: &i32, b: &i32) -> i32 {
+    match t {
+        Term::Plus => a + b,
+        Term::Times => a * b,
+    }
+}
+
+/// Place parens to maximize operations.
+/// <https://www.youtube.com/watch?v=TDo3r5M1LNo> 
+pub fn parens(nbs: &[i32], ts: &[Term]) -> i32 {
+    let mut dp = vec![vec![(0, 0); nbs.len()]; nbs.len()];
+    for (ix, v) in nbs.iter().enumerate() {
+        dp[ix][ix] = (*v, *v);
+    }
+    for j in 1..nbs.len() {
+        for i in 0..(nbs.len() - j) {
+            let mut max = i32::MIN;
+            let mut min = i32::MAX;
+            for k in i..i + j {
+                let (min0, max0) = dp[i][k];
+                let (min1, max1) = dp[k + 1][i + j];
+                for m0 in &[min0, max0] {
+                    for m1 in &[min1, max1] {
+                        let r = calc(&ts[k], m0, m1);
+                        max = max.max(r);
+                        min = min.min(r);
+                    }
+                }
+            }
+            dp[i][i + j] = (min, max);
+        }
+    }
+    dp[0][nbs.len() - 1].1
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,5 +199,17 @@ mod tests {
     #[test]
     fn test_coins() {
         assert_eq!(105, coins(&[5, 10, 100, 25]));
+    }
+
+    #[test]
+    fn test_parens() {
+        assert_eq!(
+            88,
+            parens(&[7, 4, 3, 5], &[Term::Plus, Term::Times, Term::Plus])
+        );
+        assert_eq!(
+            15,
+            parens(&[7, -4, 3, -5], &[Term::Plus, Term::Times, Term::Plus])
+        );
     }
 }
