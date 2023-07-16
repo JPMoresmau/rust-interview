@@ -150,6 +150,7 @@ pub fn parens(nbs: &[i32], ts: &[Term]) -> i32 {
     dp[0][nbs.len() - 1].1
 }
 
+/// <https://www.youtube.com/watch?v=i9OAOk0CUQE>
 pub fn rod(values: &[u32]) -> u32 {
     let mut dp = vec![0];
     for l in 0..values.len() {
@@ -157,6 +158,20 @@ pub fn rod(values: &[u32]) -> u32 {
         dp.push(m);
     }
     dp[values.len()]
+}
+
+/// <https://www.youtube.com/watch?v=i9OAOk0CUQE>
+pub fn subset_sum(sum: usize, values: &[usize]) -> bool {
+    let mut dp = vec![vec![false; sum + 1]; values.len() + 1];
+    for v in dp.iter_mut() {
+        v[0] = true;
+    }
+    for (i, v) in values.iter().enumerate() {
+        for t in 0..=sum {
+            dp[i + 1][t] = dp[i][t] || (*v <= t && dp[i][t - v]);
+        }
+    }
+    dp[values.len()][sum]
 }
 
 #[cfg(test)]
@@ -225,5 +240,11 @@ mod tests {
     #[test]
     fn test_rod() {
         assert_eq!(33, rod(&[1, 10, 13, 18, 20, 31, 32]))
+    }
+
+    #[test]
+    fn test_subset_sum() {
+        assert!(subset_sum(21, &[2, 5, 7, 8, 9]));
+        assert!(!subset_sum(25, &[2, 5, 7, 8, 9]))
     }
 }
