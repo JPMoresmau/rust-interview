@@ -123,7 +123,7 @@ fn calc(t: &Term, a: &i32, b: &i32) -> i32 {
 }
 
 /// Place parens to maximize operations.
-/// <https://www.youtube.com/watch?v=TDo3r5M1LNo> 
+/// <https://www.youtube.com/watch?v=TDo3r5M1LNo>
 pub fn parens(nbs: &[i32], ts: &[Term]) -> i32 {
     let mut dp = vec![vec![(0, 0); nbs.len()]; nbs.len()];
     for (ix, v) in nbs.iter().enumerate() {
@@ -148,6 +148,15 @@ pub fn parens(nbs: &[i32], ts: &[Term]) -> i32 {
         }
     }
     dp[0][nbs.len() - 1].1
+}
+
+pub fn rod(values: &[u32]) -> u32 {
+    let mut dp = vec![0];
+    for l in 0..values.len() {
+        let m = (0..=l).map(|p| values[p] + dp[l - p]).max().unwrap_or(0);
+        dp.push(m);
+    }
+    dp[values.len()]
 }
 
 #[cfg(test)]
@@ -211,5 +220,10 @@ mod tests {
             15,
             parens(&[7, -4, 3, -5], &[Term::Plus, Term::Times, Term::Plus])
         );
+    }
+
+    #[test]
+    fn test_rod() {
+        assert_eq!(33, rod(&[1, 10, 13, 18, 20, 31, 32]))
     }
 }
