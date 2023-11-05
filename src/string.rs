@@ -150,7 +150,7 @@ mod tests {
     #[test]
     fn test_permutations() {
         let s = HashSet::from_iter(
-            vec!["abc", "bac", "acb", "cab", "cba", "bca"]
+            ["abc", "bac", "acb", "cab", "cba", "bca"]
                 .iter()
                 .map(|s| String::from(*s)),
         );

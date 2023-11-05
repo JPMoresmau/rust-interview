@@ -44,7 +44,7 @@ pub fn longest_deranged(v: &mut Vec<String>) -> Option<(String, String)> {
         // generate key as sorted characters
         let mut sorted_chars = s.chars().collect::<Vec<char>>();
         sorted_chars.sort();
-        let anagrams = signatures.entry(sorted_chars).or_insert(vec![]);
+        let anagrams = signatures.entry(sorted_chars).or_default();
         // find if any anagram (string with the same sorted character vector) is deranged
         if let Some(a) = anagrams.iter().find(|anagram| is_deranged(anagram, s)) {
             return Some(((*a).clone(), s.clone()));

@@ -413,7 +413,7 @@ pub fn min_cost(nums: Vec<i32>, cost: Vec<i32>) -> i64 {
     let mut min_cost = 0;
     let mut compound: Vec<(i64, i64)> = nums
         .into_iter()
-        .zip(cost.into_iter())
+        .zip(cost)
         .map(|(v, c)| (v as i64, c as i64))
         .collect();
     compound.sort_by_key(|t| t.0);
@@ -449,6 +449,34 @@ pub fn longest_arith_seq_length(nums: Vec<i32>) -> i32 {
         }
     }
     max
+}
+
+/// <https://leetcode.com/problems/find-the-winner-of-an-array-game/>
+pub fn get_winner(arr: Vec<i32>, k: i32) -> i32 {
+    let mut wins = 0;
+    let mut winner_idx = 0;
+    let mut next_idx = 1;
+
+    loop {
+        if winner_idx != next_idx {
+            let i0 = arr[winner_idx];
+            let i1 = arr[next_idx];
+            if i0 > i1 {
+                wins += 1;
+            } else {
+                wins = 1;
+                winner_idx = next_idx;
+            }
+        }
+        next_idx += 1;
+        if next_idx == arr.len() {
+            next_idx = 0;
+        }
+
+        if wins == k {
+            return arr[winner_idx];
+        }
+    }
 }
 
 #[cfg(test)]
@@ -612,5 +640,11 @@ mod tests {
         assert_eq!(4, longest_arith_seq_length(vec![3, 6, 9, 12]));
         assert_eq!(3, longest_arith_seq_length(vec![9, 4, 7, 2, 10]));
         assert_eq!(4, longest_arith_seq_length(vec![20, 1, 15, 3, 10, 5, 8]));
+    }
+
+    #[test]
+    fn test_winner() {
+        assert_eq!(5, get_winner(vec![2, 1, 3, 5, 4, 6, 7], 2));
+        assert_eq!(3, get_winner(vec![3, 2, 1], 10));
     }
 }
